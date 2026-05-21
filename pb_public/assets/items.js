@@ -63,7 +63,12 @@
   function updatePendingBadges() {
     var badges = document.querySelectorAll('.pending-badge');
     badges.forEach(function (badge) {
-      badge.style.display = 'inline-block';
+      var itemId = badge.getAttribute('data-item-id');
+      if (itemId && pendingReportItemIds[itemId]) {
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
     });
   }
 
@@ -101,8 +106,8 @@
             '<div class="card-title">' +
             common.escapeHtml(item.name) +
             (pendingReportItemIds[item.id]
-              ? ' <span class="pending-badge card-tag card-tag-warning" style="display:inline-block;font-size:0.7rem;">有待审核上报</span>'
-              : ' <span class="pending-badge card-tag card-tag-warning" style="display:none;font-size:0.7rem;">有待审核上报</span>') +
+              ? ' <span class="pending-badge card-tag card-tag-warning" data-item-id="' + item.id + '" style="display:inline-block;font-size:0.7rem;">有待审核上报</span>'
+              : ' <span class="pending-badge card-tag card-tag-warning" data-item-id="' + item.id + '" style="display:none;font-size:0.7rem;">有待审核上报</span>') +
             '</div>' +
             '<div class="card-row">' +
             '<span class="card-tag">' + common.escapeHtml(item.item_type) + '</span>' +

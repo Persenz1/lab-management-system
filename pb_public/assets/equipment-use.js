@@ -43,10 +43,11 @@
     pbApi.getEquipment()
       .then(function (equipment) {
         equipment.forEach(function (eq) {
-          if (eq.status === '停用') return;
+          // 只显示启用且可用的设备（排除停用和维护中的）
+          if (eq.status !== '可用') return;
           var opt = document.createElement('option');
           opt.value = eq.id;
-          opt.textContent = eq.name + (eq.status === '维护中' ? ' [维护中]' : '');
+          opt.textContent = eq.name;
           selectEl.appendChild(opt);
         });
 

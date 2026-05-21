@@ -1,174 +1,202 @@
 // ============================================================
 // pb_hooks/main.pb.js
-// PocketBase JS Hook — 设备使用登记 custom route
+// PocketBase JS Hook
+//
+// PocketBase v0.23+ 兼容（使用 $app.save / runInTransaction）
+// v0.22 用户：$app.save 可用，但不支持 runInTransaction，见底部回退说明
 //
 // 部署：将此文件放入 pb_hooks/ 目录，重启 PocketBase 即可生效
 // ============================================================
 
 // ----------------------------------------------------------
-// 并发说明：
-//
-// PocketBase JS hooks 运行在单个 Go 协程的事件循环中，
-// 同一 PocketBase 实例内不会有两个 hook 请求同时执行 JS 代码。
-// 因此 "查询旧 active → 关闭 → 创建新记录" 的序列在单实例
-// 部署下是安全的，不会产生多条 active 记录。
-//
-// 限制：如果有多个 PocketBase 实例共享同一个 pb_data
-// 目录（不推荐），上述保证将不成立。本项目的 systemd 单实例
-// 部署不存在此问题。
+// 辅助函数：校验材料 ID 是否存在且 is_active=true
 // ----------------------------------------------------------
+function validateMaterials(materialIds) {
+    if (!Array.isArray(materialIds) || materialIds.length === 0) {
+        return [];
+    }
+    let clean = materialIds
+        .filter(function (id) { return id && id.toString().trim(); })
+        .filter(function (id, i, arr) { return arr.indexOf(id) === i; });
 
-routerAdd("POST", "/api/custom/equipment-use", (c) => {
+    for (let i = 0; i < clean.length; i++) {
+        try {
+            let item = $app.findRecordById("items", clean[i]);
+            if (item.getBool("is_active") !== true) {
+                return { error: "材料「" + item.getString("name") + "」已停用，请重新选择" };
+            }
+        } catch (e) {
+            return { error: "材料记录 " + clean[i] + " 不存在" };
+        }
+    }
+    return clean;
+}
+
+// ============================================================
+// Hook 1: 强制 review_status 为 "待审核"，防止匿名用户伪造审核状态
+// ============================================================
+onRecordCreateRequest(function (e) {
+    e.record.set("review_status", "待审核");
+    e.record.set("reviewed_by", "");
+    e.record.set("reviewed_at", "");
+}, "item_reports", "new_item_reports");
+
+onRecordCreateRequest(function (e) {
+    e.record.set("created_item", "");
+}, "new_item_reports");
+
+// ============================================================
+// Hook 2: 设备使用登记 custom route
+// ============================================================
+routerAdd("POST", "/api/custom/equipment-use", function (c) {
     // ---- 1. 解析请求体 ----
-    let body = $apis.requestInfo(c).body;
-    let data = {};
+    var rawBody = $apis.requestInfo(c).body;
+    var data = {};
 
     try {
-        data = JSON.parse(body || "{}");
+        data = JSON.parse(rawBody || "{}");
     } catch (e) {
-        return c.json(400, {
-            code: 400,
-            message: "请求格式错误，请使用 JSON",
-        });
+        return c.json(400, { code: 400, message: "请求格式错误，请使用 JSON" });
     }
 
     // ---- 2. 校验必填字段 ----
-    let equipmentId = (data.equipment_id || "").trim();
-    let userName = (data.user_name || "").trim();
+    var equipmentId = (data.equipment_id || "").trim();
+    var userName = (data.user_name || "").trim();
 
     if (!equipmentId) {
-        return c.json(400, {
-            code: 400,
-            message: "缺少 equipment_id",
-        });
+        return c.json(400, { code: 400, message: "缺少 equipment_id" });
     }
     if (!userName) {
-        return c.json(400, {
-            code: 400,
-            message: "缺少 user_name",
-        });
+        return c.json(400, { code: 400, message: "缺少 user_name" });
     }
 
-    let estimatedDuration = data.estimated_duration || 0;
-    let materials = data.materials || [];
-    let note = (data.note || "").trim();
-
+    var estimatedDuration = data.estimated_duration || 0;
     if (estimatedDuration && typeof estimatedDuration !== "number") {
         estimatedDuration = parseInt(estimatedDuration, 10) || 0;
     }
+    var materials = data.materials || [];
+    var note = (data.note || "").trim();
 
-    // ---- 3. 查询设备 ----
-    let equipment;
-    let equipmentCollection;
-
+    // ---- 3. 校验设备 ----
+    var equipment;
     try {
-        equipmentCollection = $app.findCollectionByNameOrId("equipment");
         equipment = $app.findRecordById("equipment", equipmentId);
     } catch (e) {
-        return c.json(404, {
-            code: 404,
-            message: "设备不存在",
-        });
+        return c.json(404, { code: 404, message: "设备不存在" });
     }
 
-    // ---- 4. 校验设备状态 ----
     if (equipment.getBool("is_active") !== true) {
+        return c.json(400, { code: 400, message: "设备已停用，无法登记" });
+    }
+    if (equipment.getString("status") !== "可用") {
         return c.json(400, {
             code: 400,
-            message: "设备已停用，无法登记",
+            message: "设备当前状态为「" + equipment.getString("status") + "」，无法登记使用",
         });
     }
 
-    let equipmentStatus = equipment.getString("status");
-    if (equipmentStatus !== "可用") {
-        return c.json(400, {
-            code: 400,
-            message: "设备当前状态为「" + equipmentStatus + "」，无法登记使用",
-        });
+    // ---- 4. 校验材料（在事务外完成，避免事务内校验失败） ----
+    var validMaterials = validateMaterials(materials);
+    if (validMaterials && validMaterials.error) {
+        return c.json(400, { code: 400, message: validMaterials.error });
     }
 
-    // ---- 5. 查询并关闭旧 active 记录 ----
-    // 注意：理论上同一设备只会有一条 active 记录，
-    // 但用循环处理以防万一存在脏数据
-    let now = new Date().toISOString();
+    var now = new Date().toISOString();
 
-    try {
-        let oldActiveRecords = $app.findRecordsByFilter(
-            "equipment_usage",
-            "equipment = {:eqId} && status = {:sts}",
-            "",   // 不排序
-            100,  // 取足够多条
-            0,
-            { eqId: equipmentId, sts: "active" }
-        );
+    // ---- 5. 在事务中执行：关闭旧 active + 创建新记录 ----
+    //
+    // 如果 PocketBase 版本支持 runInTransaction（v0.23+），
+    // 整个操作是原子的：任一步骤失败都会回滚。
+    //
+    // 如果不支持（v0.22），回退到顺序执行，并在注释中说明限制。
+    // ----------------------------------------------------------
+    var result = null;
+    var hasTransaction = typeof $app.runInTransaction === "function";
 
-        for (let i = 0; i < oldActiveRecords.length; i++) {
-            let oldRecord = oldActiveRecords[i];
-            oldRecord.set("end_time", now);
-            oldRecord.set("status", "closed");
-            oldRecord.set("end_reason", "overridden_by_new_usage");
-            $app.dao().saveRecord(oldRecord);
-        }
-    } catch (e) {
-        return c.json(500, {
-            code: 500,
-            message: "关闭旧使用记录时出错：请稍后重试",
-        });
-    }
-
-    // ---- 6. 创建新 active 记录 ----
-    let usageCollection;
-    try {
-        usageCollection = $app.findCollectionByNameOrId("equipment_usage");
-    } catch (e) {
-        return c.json(500, {
-            code: 500,
-            message: "系统错误：找不到 equipment_usage 集合",
-        });
-    }
-
-    let newRecord = new Record(usageCollection);
-
-    newRecord.set("equipment", equipmentId);
-    newRecord.set("user_name", userName);
-    newRecord.set("start_time", now);
-    newRecord.set("status", "active");
-    newRecord.set("note", note);
-
-    if (estimatedDuration && estimatedDuration > 0) {
-        newRecord.set("estimated_duration", estimatedDuration);
-    }
-
-    // materials 是多个 relation 到 items，值为 ID 数组
-    if (Array.isArray(materials) && materials.length > 0) {
-        // 去除空值和重复
-        let cleanMaterials = materials
-            .filter(function (id) { return id && id.toString().trim(); })
-            .filter(function (id, i, arr) { return arr.indexOf(id) === i; });
-        if (cleanMaterials.length > 0) {
-            newRecord.set("materials", cleanMaterials);
-        }
-    }
-
-    try {
-        $app.dao().saveRecord(newRecord);
-    } catch (e) {
-        let msg = "创建使用记录时出错：";
+    if (hasTransaction) {
+        // v0.23+：原子事务
         try {
-            msg += e.message || e;
-        } catch (_) {
-            msg += "请稍后重试";
+            result = $app.runInTransaction(function (txApp) {
+                // 关闭旧 active 记录
+                var oldRecords = txApp.findRecordsByFilter(
+                    "equipment_usage",
+                    "equipment = {:eqId} && status = {:sts}",
+                    "", 100, 0,
+                    { eqId: equipmentId, sts: "active" }
+                );
+                for (var i = 0; i < oldRecords.length; i++) {
+                    var rec = oldRecords[i];
+                    rec.set("end_time", now);
+                    rec.set("status", "closed");
+                    rec.set("end_reason", "overridden_by_new_usage");
+                    txApp.save(rec);
+                }
+
+                // 创建新记录
+                var collection = txApp.findCollectionByNameOrId("equipment_usage");
+                var newRecord = new Record(collection);
+                newRecord.set("equipment", equipmentId);
+                newRecord.set("user_name", userName);
+                newRecord.set("start_time", now);
+                newRecord.set("status", "active");
+                newRecord.set("note", note);
+                if (estimatedDuration && estimatedDuration > 0) {
+                    newRecord.set("estimated_duration", estimatedDuration);
+                }
+                if (Array.isArray(validMaterials) && validMaterials.length > 0) {
+                    newRecord.set("materials", validMaterials);
+                }
+                txApp.save(newRecord);
+
+                return newRecord;
+            });
+        } catch (e) {
+            var msg = "登记失败：";
+            try { msg += e.message || e; } catch (_) { msg += "请稍后重试"; }
+            return c.json(500, { code: 500, message: msg });
         }
-        return c.json(500, {
-            code: 500,
-            message: msg,
-        });
+    } else {
+        // v0.22 回退：顺序执行
+        // 注意：存在极小概率“关闭成功但创建失败”，建议升级到 v0.23+
+        try {
+            var oldRecords = $app.findRecordsByFilter(
+                "equipment_usage",
+                "equipment = {:eqId} && status = {:sts}",
+                "", 100, 0,
+                { eqId: equipmentId, sts: "active" }
+            );
+            for (var i = 0; i < oldRecords.length; i++) {
+                var rec = oldRecords[i];
+                rec.set("end_time", now);
+                rec.set("status", "closed");
+                rec.set("end_reason", "overridden_by_new_usage");
+                $app.save(rec);
+            }
+            var collection = $app.findCollectionByNameOrId("equipment_usage");
+            var newRecord = new Record(collection);
+            newRecord.set("equipment", equipmentId);
+            newRecord.set("user_name", userName);
+            newRecord.set("start_time", now);
+            newRecord.set("status", "active");
+            newRecord.set("note", note);
+            if (estimatedDuration && estimatedDuration > 0) {
+                newRecord.set("estimated_duration", estimatedDuration);
+            }
+            if (Array.isArray(validMaterials) && validMaterials.length > 0) {
+                newRecord.set("materials", validMaterials);
+            }
+            $app.save(newRecord);
+            result = newRecord;
+        } catch (e) {
+            var msg = "登记失败：";
+            try { msg += e.message || e; } catch (_) { msg += "请稍后重试"; }
+            return c.json(500, { code: 500, message: msg });
+        }
     }
 
-    // ---- 7. 返回新记录 ----
-    // 重新查询以获得完整 expand 数据
+    // ---- 6. 返回新记录 ----
     try {
-        let saved = $app.findRecordById("equipment_usage", newRecord.getId());
+        var saved = $app.findRecordById("equipment_usage", result.getId());
         return c.json(200, {
             code: 200,
             message: "登记成功",
@@ -184,12 +212,11 @@ routerAdd("POST", "/api/custom/equipment-use", (c) => {
             },
         });
     } catch (e) {
-        // 即使查询失败，记录已创建，返回基本信息
         return c.json(200, {
             code: 200,
             message: "登记成功",
             data: {
-                id: newRecord.getId(),
+                id: result.getId(),
                 equipment: equipmentId,
                 user_name: userName,
                 start_time: now,
