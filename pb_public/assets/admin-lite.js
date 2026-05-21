@@ -164,15 +164,15 @@
 
     var now = new Date().toISOString();
 
-    // Step 1: 更新 item_reports 审核状态
-    // Step 2: 更新 items.status = reported_status
-    pbApi.updateItemReport(reportId, {
-      review_status: '已通过',
-      reviewed_by: adminDisplayName,
-      reviewed_at: now,
-    })
+    // Step 1: 先更新 items.status（若失败，report 保持 "待审核"）
+    // Step 2: 再更新 item_reports 审核状态
+    pbApi.getPb().collection('items').update(itemId, { status: reportedStatus })
       .then(function () {
-        return pbApi.getPb().collection('items').update(itemId, { status: reportedStatus });
+        return pbApi.updateItemReport(reportId, {
+          review_status: '已通过',
+          reviewed_by: adminDisplayName,
+          reviewed_at: now,
+        });
       })
       .then(function () {
         common.showMessage('admin-message', '已通过物资状态上报，正式物资状态已更新', 'success');
@@ -270,10 +270,13 @@
 
     setButtonLoadingById(reportId, 'approve-new-btn', true);
 
-    // 先获取上报详情
+    var createdItemId = null;
+
+    // Step 1: 创建正式 items 记录
+    // Step 2: 更新上报记录并回填 created_item
+    // 若 Step 2 失败，尝试回滚 Step 1 的 items 记录
     pbApi.getPb().collection('new_item_reports').getOne(reportId)
       .then(function (report) {
-        // 创建正式 items 记录
         var itemData = {
           name: report.name,
           item_type: report.item_type,
@@ -286,17 +289,15 @@
         if (report.location) {
           itemData.location = report.location;
         }
-        return pbApi.createItem(itemData).then(function (created) {
-          return { report: report, created: created };
-        });
+        return pbApi.createItem(itemData);
       })
-      .then(function (result) {
-        // 更新上报记录
+      .then(function (created) {
+        createdItemId = created.id;
         return pbApi.updateNewItemReport(reportId, {
           review_status: '已通过',
           reviewed_by: adminDisplayName,
           reviewed_at: new Date().toISOString(),
-          created_item: result.created.id,
+          created_item: createdItemId,
         });
       })
       .then(function () {
@@ -305,7 +306,13 @@
         loadPendingNewItems();
       })
       .catch(function (err) {
-        common.showMessage('admin-message', '操作失败：' + pbApi.getError(err), 'error');
+        // 如果 items 已创建但 report 更新失败，尝试删除孤儿的 items 记录
+        if (createdItemId) {
+          pbApi.getPb().collection('items').delete(createdItemId).catch(function () {});
+          common.showMessage('admin-message', '操作失败：上报审核出错，已回滚正式物资记录', 'error');
+        } else {
+          common.showMessage('admin-message', '操作失败：' + pbApi.getError(err), 'error');
+        }
         loadPendingNewItems();
       });
   }
