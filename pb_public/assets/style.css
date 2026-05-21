@@ -490,6 +490,85 @@ body {
   margin-top: 0.75rem;
 }
 
+/* ---- 管理面板 ---- */
+.admin-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-search-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-search-row .form-input {
+  flex: 1;
+  min-width: 150px;
+}
+
+.admin-search-row .form-select {
+  min-width: 120px;
+}
+
+.admin-inline-form {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-list-item:last-child {
+  border-bottom: none;
+}
+
+.admin-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-list-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.admin-list-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.admin-list-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.admin-list-disabled {
+  opacity: 0.5;
+}
+
+@media (min-width: 768px) {
+  .admin-list-item {
+    padding: 0.6rem 0;
+  }
+}
+
 /* ============================================================
    桌面端适配（>= 768px）
    ============================================================ */

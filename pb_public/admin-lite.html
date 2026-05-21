@@ -16,10 +16,9 @@
   </nav>
 
   <div class="page-container">
-
     <div class="page-header">
       <h1>管理后台</h1>
-      <p>审核上报、管理设备、导出数据</p>
+      <p>审核上报、管理数据、导出报表</p>
     </div>
 
     <div id="admin-message"></div>
@@ -42,50 +41,108 @@
       </div>
     </div>
 
-    <!-- 管理区（登录后可见） -->
+    <!-- 管理区 -->
     <div id="admin-section" style="display:none;">
-      <!-- 管理员信息栏 -->
       <div id="admin-bar" class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <span style="font-size:0.9rem;color:#475569;">管理员：<strong id="admin-name-display"></strong></span>
         <button id="logout-btn" class="btn btn-small btn-secondary">登出</button>
       </div>
 
-      <!-- 标签切换 -->
       <div class="tabs">
-        <button class="tab-btn active" data-tab="pending-item-reports">待审核物资上报</button>
-        <button class="tab-btn" data-tab="pending-new-items">待审核新物资</button>
-        <button class="tab-btn" data-tab="active-equipment">当前使用设备</button>
-        <button class="tab-btn" data-tab="export">CSV 导出</button>
+        <button class="tab-btn active" data-tab="review">审核中心</button>
+        <button class="tab-btn" data-tab="items">物资管理</button>
+        <button class="tab-btn" data-tab="equipment">设备管理</button>
+        <button class="tab-btn" data-tab="members">成员管理</button>
+        <button class="tab-btn" data-tab="locations">位置管理</button>
+        <button class="tab-btn" data-tab="usage">当前设备使用</button>
+        <button class="tab-btn" data-tab="export">数据导出</button>
       </div>
 
-      <!-- 待审核物资状态上报 -->
-      <div id="tab-pending-item-reports" class="tab-panel active">
-        <div id="item-reports-list"></div>
-        <div id="no-item-reports" class="empty-state" style="display:none;">
-          <p>暂无待审核的物资状态上报</p>
+      <!-- 审核中心 -->
+      <div id="tab-review" class="tab-panel active">
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-title">待审核物资状态上报</div>
+          <div id="item-reports-list"></div>
+          <div id="no-item-reports" class="empty-state" style="display:none;"><p>暂无待审核的物资状态上报</p></div>
+        </div>
+        <div class="card">
+          <div class="card-title">待审核新物资</div>
+          <div id="new-items-list"></div>
+          <div id="no-new-items" class="empty-state" style="display:none;"><p>暂无待审核的新物资上报</p></div>
         </div>
       </div>
 
-      <!-- 待审核新物资 -->
-      <div id="tab-pending-new-items" class="tab-panel">
-        <div id="new-items-list"></div>
-        <div id="no-new-items" class="empty-state" style="display:none;">
-          <p>暂无待审核的新物资上报</p>
+      <!-- 物资管理 -->
+      <div id="tab-items" class="tab-panel">
+        <div class="admin-panel-header">
+          <span style="font-weight:600;color:#0f172a;">物资列表</span>
+          <button class="btn btn-primary btn-small" id="add-item-btn">新增物资</button>
         </div>
+        <div class="admin-search-row">
+          <input type="text" id="items-search" class="form-input" placeholder="搜索名称或规格...">
+          <select id="items-type-filter" class="form-select">
+            <option value="">全部类型</option>
+            <option value="3D打印材料">3D打印材料</option>
+            <option value="机械耗材">机械耗材</option>
+            <option value="电子元件">电子元件</option>
+            <option value="化学材料">化学材料</option>
+            <option value="工具">工具</option>
+            <option value="其他">其他</option>
+          </select>
+          <select id="items-status-filter" class="form-select">
+            <option value="">全部状态</option>
+            <option value="正常">正常</option>
+            <option value="使用中">使用中</option>
+            <option value="余量低">余量低</option>
+            <option value="已耗尽">已耗尽</option>
+            <option value="损坏/失效">损坏/失效</option>
+            <option value="位置不明">位置不明</option>
+          </select>
+        </div>
+        <div id="items-inline-form"></div>
+        <div id="items-list-container"></div>
       </div>
 
-      <!-- 当前 active 设备记录 -->
-      <div id="tab-active-equipment" class="tab-panel">
+      <!-- 设备管理 -->
+      <div id="tab-equipment" class="tab-panel">
+        <div class="admin-panel-header">
+          <span style="font-weight:600;color:#0f172a;">设备列表</span>
+          <button class="btn btn-primary btn-small" id="add-equipment-btn">新增设备</button>
+        </div>
+        <div id="equipment-inline-form"></div>
+        <div id="equipment-list-container"></div>
+      </div>
+
+      <!-- 成员管理 -->
+      <div id="tab-members" class="tab-panel">
+        <div class="admin-panel-header">
+          <span style="font-weight:600;color:#0f172a;">成员列表</span>
+          <button class="btn btn-primary btn-small" id="add-member-btn">新增成员</button>
+        </div>
+        <div id="members-inline-form"></div>
+        <div id="members-list-container"></div>
+      </div>
+
+      <!-- 位置管理 -->
+      <div id="tab-locations" class="tab-panel">
+        <div class="admin-panel-header">
+          <span style="font-weight:600;color:#0f172a;">位置列表</span>
+          <button class="btn btn-primary btn-small" id="add-location-btn">新增位置</button>
+        </div>
+        <div id="locations-inline-form"></div>
+        <div id="locations-list-container"></div>
+      </div>
+
+      <!-- 当前设备使用 -->
+      <div id="tab-usage" class="tab-panel">
         <div id="active-usage-list"></div>
-        <div id="no-active-usage" class="empty-state" style="display:none;">
-          <p>当前没有正在使用的设备</p>
-        </div>
+        <div id="no-active-usage" class="empty-state" style="display:none;"><p>当前没有正在使用的设备</p></div>
       </div>
 
-      <!-- CSV 导出 -->
+      <!-- 数据导出 -->
       <div id="tab-export" class="tab-panel">
         <div class="export-section">
-          <p style="margin-bottom:1rem;color:#64748b;">选择需要导出的数据（含中文表头，Excel 可直接打开）</p>
+          <p style="margin-bottom:1rem;color:#64748b;">选择需要导出的数据（中文表头，Excel 可直接打开）</p>
           <button id="export-items-btn" class="btn btn-primary">导出物资台账 CSV</button>
           <button id="export-item-reports-btn" class="btn btn-primary">导出物资状态上报 CSV</button>
           <button id="export-new-items-btn" class="btn btn-primary">导出新物资上报 CSV</button>
@@ -94,12 +151,10 @@
         <div id="export-msg"></div>
       </div>
 
-      <!-- 跳转 PocketBase Admin -->
       <div class="home-sub">
-        <a href="/_/" target="_blank">打开 PocketBase Admin &#8594;</a>
+        <a href="/_/" target="_blank">高级数据库后台（英文，仅维护人员使用）</a>
       </div>
     </div>
-
   </div>
 
   <script src="assets/vendor/pocketbase.umd.js"></script>

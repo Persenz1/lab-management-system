@@ -201,6 +201,26 @@ var pbApi = (function () {
     });
   }
 
+  // ---- 管理员 CRUD ----
+  function adminGetAll(collection, sort) {
+    return pb.collection(collection).getFullList({
+      sort: sort || '-created',
+      expand: collection === 'items' || collection === 'equipment' ? 'location' : '',
+    });
+  }
+
+  function adminCreate(collection, data) {
+    return pb.collection(collection).create(data);
+  }
+
+  function adminUpdate(collection, id, data) {
+    return pb.collection(collection).update(id, data);
+  }
+
+  function adminDisable(collection, id) {
+    return pb.collection(collection).update(id, { is_active: false });
+  }
+
   // ---- 导出 CSV（用 fetch 拼接参数） ----
   function exportCsv(collectionName, filter) {
     var params = new URLSearchParams();
@@ -233,6 +253,10 @@ var pbApi = (function () {
     approveNewItem: approveNewItem,
     rejectNewItem: rejectNewItem,
     closeEquipmentUsage: closeEquipmentUsage,
+    adminGetAll: adminGetAll,
+    adminCreate: adminCreate,
+    adminUpdate: adminUpdate,
+    adminDisable: adminDisable,
     exportCsv: exportCsv,
   };
 })();
