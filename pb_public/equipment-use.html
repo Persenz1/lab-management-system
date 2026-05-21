@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设备使用登记 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">设备使用登记</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>设备使用登记</h1>
+      <p>请填写使用信息，提交后将自动关闭该设备的上一条使用记录</p>
+    </div>
+
+    <div id="form-message"></div>
+
+    <form id="equipment-use-form" class="card">
+      <!-- 使用人 -->
+      <div class="form-group">
+        <label class="form-label" for="user-name">使用人 <span style="color:#dc2626;">*</span></label>
+        <select id="user-name" class="form-select">
+          <option value="">请选择使用人</option>
+        </select>
+        <input type="text" id="user-name-manual" class="form-input" placeholder="或手动输入临时使用人" style="margin-top:0.35rem;">
+        <div class="form-hint">优先从成员列表选择，也可手动填写临时人员</div>
+      </div>
+
+      <!-- 使用设备 -->
+      <div class="form-group">
+        <label class="form-label" for="equipment-id">使用设备 <span style="color:#dc2626;">*</span></label>
+        <select id="equipment-id" class="form-select">
+          <option value="">请选择设备</option>
+        </select>
+      </div>
+
+      <!-- 预计使用时间 -->
+      <div class="form-group">
+        <label class="form-label" for="estimated-duration">预计使用时间</label>
+        <select id="estimated-duration" class="form-select">
+          <option value="60">1 小时内</option>
+          <option value="120">2 小时</option>
+          <option value="240">4 小时</option>
+          <option value="480">8 小时</option>
+          <option value="720">12 小时</option>
+          <option value="1440">24 小时</option>
+          <option value="">不确定</option>
+        </select>
+      </div>
+
+      <!-- 使用材料 -->
+      <div class="form-group">
+        <label class="form-label">使用材料（可多选）</label>
+        <div id="materials-checkboxes" class="form-checkbox-group">
+        </div>
+      </div>
+
+      <!-- 备注 -->
+      <div class="form-group">
+        <label class="form-label" for="note">备注</label>
+        <textarea id="note" class="form-textarea" rows="2" placeholder="可选备注"></textarea>
+      </div>
+
+      <!-- 提交 -->
+      <button type="submit" class="btn btn-primary btn-large">提交登记</button>
+    </form>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/equipment-use.js"></script>
+</body>
+</html>

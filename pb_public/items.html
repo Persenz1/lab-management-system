@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物资列表 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">物资列表</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>物资列表</h1>
+      <p>查看实验室现有物资信息</p>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <input type="text" id="search-input" class="form-input" placeholder="搜索物资名称...">
+    </div>
+
+    <!-- 筛选器 -->
+    <div class="filter-row">
+      <select id="filter-type" class="form-select">
+        <option value="">全部类型</option>
+        <option value="3D打印材料">3D打印材料</option>
+        <option value="机械耗材">机械耗材</option>
+        <option value="电子元件">电子元件</option>
+        <option value="化学材料">化学材料</option>
+        <option value="工具">工具</option>
+        <option value="其他">其他</option>
+      </select>
+      <select id="filter-status" class="form-select">
+        <option value="">全部状态</option>
+        <option value="正常">正常</option>
+        <option value="使用中">使用中</option>
+        <option value="余量低">余量低</option>
+        <option value="已耗尽">已耗尽</option>
+        <option value="损坏/失效">损坏/失效</option>
+        <option value="位置不明">位置不明</option>
+      </select>
+      <select id="filter-location" class="form-select">
+        <option value="">全部位置</option>
+        <option value="A区">A区</option>
+        <option value="B区">B区</option>
+        <option value="C区">C区</option>
+        <option value="D区">D区</option>
+        <option value="E区">E区</option>
+        <option value="F区">F区</option>
+        <option value="未分类">未分类</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+
+    <!-- 物资列表 -->
+    <div id="items-list">
+      <div class="card">
+        <div class="card-title">PLA 白色 1.75mm</div>
+        <div class="card-row">
+          <span class="card-tag">3D打印材料</span>
+          <span class="card-tag card-tag-success">正常</span>
+          <span>A区</span>
+        </div>
+        <div class="card-row">规格：1.75mm / 1kg</div>
+        <div class="card-actions">
+          <a href="item-report.html" class="btn btn-outline btn-small">上报状态</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">M3x10 螺丝</div>
+        <div class="card-row">
+          <span class="card-tag">机械耗材</span>
+          <span class="card-tag card-tag-warning">余量低</span>
+          <span>C区</span>
+        </div>
+        <div class="card-row">规格：M3 x 10mm</div>
+        <div class="card-actions">
+          <a href="item-report.html" class="btn btn-outline btn-small">上报状态</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Arduino Uno R3</div>
+        <div class="card-row">
+          <span class="card-tag">电子元件</span>
+          <span class="card-tag card-tag-success">正常</span>
+          <span>D区</span>
+        </div>
+        <div class="card-actions">
+          <a href="item-report.html" class="btn btn-outline btn-small">上报状态</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="no-items" class="empty-state" style="display:none;">
+      <p>暂无物资记录</p>
+    </div>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/items.js"></script>
+</body>
+</html>

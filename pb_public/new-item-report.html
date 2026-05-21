@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新物资上报 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">新物资上报</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>新物资上报</h1>
+      <p>提交新的物资信息，需要管理员审核后才会添加到正式台账</p>
+    </div>
+
+    <div id="form-message"></div>
+
+    <form id="new-item-report-form" class="card">
+      <!-- 上报人 -->
+      <div class="form-group">
+        <label class="form-label" for="reporter-name">上报人 <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="reporter-name" class="form-input" placeholder="请输入您的姓名">
+      </div>
+
+      <!-- 物资名称 -->
+      <div class="form-group">
+        <label class="form-label" for="item-name">物资名称 <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="item-name" class="form-input" placeholder="请输入物资名称">
+      </div>
+
+      <!-- 物资类型 -->
+      <div class="form-group">
+        <label class="form-label" for="item-type">物资类型 <span style="color:#dc2626;">*</span></label>
+        <select id="item-type" class="form-select">
+          <option value="">请选择类型</option>
+          <option value="3D打印材料">3D打印材料</option>
+          <option value="机械耗材">机械耗材</option>
+          <option value="电子元件">电子元件</option>
+          <option value="化学材料">化学材料</option>
+          <option value="工具">工具</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+
+      <!-- 规格 -->
+      <div class="form-group">
+        <label class="form-label" for="specification">规格</label>
+        <input type="text" id="specification" class="form-input" placeholder="如型号、尺寸、重量等">
+      </div>
+
+      <!-- 初始状态 -->
+      <div class="form-group">
+        <label class="form-label" for="initial-status">初始状态</label>
+        <select id="initial-status" class="form-select">
+          <option value="正常">正常</option>
+          <option value="使用中">使用中</option>
+          <option value="余量低">余量低</option>
+        </select>
+      </div>
+
+      <!-- 位置 -->
+      <div class="form-group">
+        <label class="form-label" for="location">位置</label>
+        <select id="location" class="form-select">
+          <option value="">请选择位置</option>
+          <option value="A区">A区</option>
+          <option value="B区">B区</option>
+          <option value="C区">C区</option>
+          <option value="D区">D区</option>
+          <option value="E区">E区</option>
+          <option value="F区">F区</option>
+          <option value="未分类">未分类</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+
+      <!-- 位置补充 -->
+      <div class="form-group">
+        <label class="form-label" for="location-note">位置补充</label>
+        <input type="text" id="location-note" class="form-input" placeholder="如第几个抽屉、第几层架子">
+      </div>
+
+      <!-- 备注 -->
+      <div class="form-group">
+        <label class="form-label" for="note">备注</label>
+        <textarea id="note" class="form-textarea" rows="2" placeholder="其他需要说明的信息"></textarea>
+      </div>
+
+      <!-- 提交 -->
+      <button type="submit" class="btn btn-primary btn-large">提交上报</button>
+    </form>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/new-item-report.js"></script>
+</body>
+</html>

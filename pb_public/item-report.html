@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物资状态上报 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">物资状态上报</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>物资状态上报</h1>
+      <p>上报已有物资的当前状态，需要管理员审核后生效</p>
+    </div>
+
+    <div id="form-message"></div>
+
+    <form id="item-report-form" class="card">
+      <!-- 上报人 -->
+      <div class="form-group">
+        <label class="form-label" for="reporter-name">上报人 <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="reporter-name" class="form-input" placeholder="请输入您的姓名">
+      </div>
+
+      <!-- 选择物资 -->
+      <div class="form-group">
+        <label class="form-label" for="item-id">选择物资 <span style="color:#dc2626;">*</span></label>
+        <select id="item-id" class="form-select">
+          <option value="">请选择物资</option>
+        </select>
+      </div>
+
+      <!-- 上报状态 -->
+      <div class="form-group">
+        <label class="form-label" for="reported-status">上报状态 <span style="color:#dc2626;">*</span></label>
+        <select id="reported-status" class="form-select">
+          <option value="">请选择状态</option>
+          <option value="正常">正常</option>
+          <option value="使用中">使用中</option>
+          <option value="余量低">余量低</option>
+          <option value="已耗尽">已耗尽</option>
+          <option value="损坏/失效">损坏/失效</option>
+          <option value="位置不明">位置不明</option>
+        </select>
+      </div>
+
+      <!-- 备注 -->
+      <div class="form-group">
+        <label class="form-label" for="note">备注</label>
+        <textarea id="note" class="form-textarea" rows="2" placeholder="可选备注，如损坏原因、具体位置等"></textarea>
+      </div>
+
+      <!-- 提交 -->
+      <button type="submit" class="btn btn-primary btn-large">提交上报</button>
+    </form>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/item-report.js"></script>
+</body>
+</html>

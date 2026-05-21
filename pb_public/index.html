@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <span class="navbar-title">实验室管理系统</span>
+      <span></span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>实验室管理系统</h1>
+      <p>请选择需要进行的操作</p>
+    </div>
+
+    <div id="status-summary" class="card" style="display:none;">
+      <div class="card-title">设备状态摘要</div>
+      <div id="status-content">加载中...</div>
+    </div>
+
+    <div class="home-actions">
+      <a href="equipment-use.html" class="btn btn-primary btn-large">设备使用登记</a>
+      <a href="equipment.html" class="btn btn-outline btn-large">查看设备状态</a>
+      <a href="items.html" class="btn btn-outline btn-large">查看物资列表</a>
+      <a href="item-report.html" class="btn btn-outline btn-large">物资状态上报</a>
+      <a href="new-item-report.html" class="btn btn-outline btn-large">新物资上报</a>
+    </div>
+
+    <div id="item-alerts" class="card" style="display:none;">
+      <div class="card-title">物资提醒</div>
+      <div id="alerts-content">加载中...</div>
+    </div>
+
+    <div class="home-sub">
+      <a href="admin-lite.html">管理员入口</a>
+    </div>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/home.js"></script>
+</body>
+</html>

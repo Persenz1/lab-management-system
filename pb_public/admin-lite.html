@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">管理后台</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>管理后台</h1>
+      <p>审核上报、管理设备、导出数据</p>
+    </div>
+
+    <div id="admin-message"></div>
+
+    <!-- 标签切换 -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pending-item-reports">待审核物资上报</button>
+      <button class="tab-btn" data-tab="pending-new-items">待审核新物资</button>
+      <button class="tab-btn" data-tab="active-equipment">当前使用设备</button>
+      <button class="tab-btn" data-tab="export">CSV 导出</button>
+    </div>
+
+    <!-- 待审核物资状态上报 -->
+    <div id="tab-pending-item-reports" class="tab-panel active">
+      <!-- 手机端：卡片布局 -->
+      <div id="item-reports-list">
+        <div class="card">
+          <div class="card-title">PLA 白色 1.75mm</div>
+          <div class="card-row">
+            <span>上报人：李四</span>
+            <span>上报状态：</span>
+            <span class="card-tag card-tag-warning">余量低</span>
+          </div>
+          <div class="card-row">备注：只剩大概 200g</div>
+          <div class="card-actions">
+            <button class="btn btn-success btn-small btn-approve" data-type="item_report">通过</button>
+            <button class="btn btn-danger btn-small btn-reject" data-type="item_report">拒绝</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="no-item-reports" class="empty-state" style="display:none;">
+        <p>暂无待审核的物资状态上报</p>
+      </div>
+    </div>
+
+    <!-- 待审核新物资 -->
+    <div id="tab-pending-new-items" class="tab-panel">
+      <div id="new-items-list">
+        <div class="card">
+          <div class="card-title">PETG 黑色 1.75mm</div>
+          <div class="card-row">
+            <span class="card-tag">3D打印材料</span>
+            <span>上报人：王五</span>
+          </div>
+          <div class="card-row">规格：1.75mm / 1kg</div>
+          <div class="card-row">位置：A区</div>
+          <div class="card-actions">
+            <button class="btn btn-success btn-small btn-approve" data-type="new_item">通过</button>
+            <button class="btn btn-danger btn-small btn-reject" data-type="new_item">拒绝</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="no-new-items" class="empty-state" style="display:none;">
+        <p>暂无待审核的新物资上报</p>
+      </div>
+    </div>
+
+    <!-- 当前 active 设备记录 -->
+    <div id="tab-active-equipment" class="tab-panel">
+      <div id="active-usage-list">
+        <div class="card">
+          <div class="card-title">服务器 B</div>
+          <div class="card-row">
+            <span class="card-tag card-tag-warning">使用中</span>
+            <span>使用人：张三</span>
+          </div>
+          <div class="card-row">
+            <span>开始：10:00</span>
+            <span>预计：4 小时</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-danger btn-small btn-close-usage">手动关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="no-active-usage" class="empty-state" style="display:none;">
+        <p>当前没有正在使用的设备</p>
+      </div>
+    </div>
+
+    <!-- CSV 导出 -->
+    <div id="tab-export" class="tab-panel">
+      <div class="export-section">
+        <p style="margin-bottom:1rem;color:#64748b;">选择需要导出的数据</p>
+        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出物资台账 CSV</button>
+        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出物资状态上报 CSV</button>
+        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出新物资上报 CSV</button>
+        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出设备使用记录 CSV</button>
+      </div>
+    </div>
+
+    <!-- 跳转 PocketBase Admin -->
+    <div class="home-sub">
+      <a href="/_/" target="_blank">打开 PocketBase Admin →</a>
+    </div>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/admin-lite.js"></script>
+</body>
+</html>

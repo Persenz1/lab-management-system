@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设备状态看板 - 实验室管理系统</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-back">&#8592; 返回首页</a>
+      <span class="navbar-title">设备状态看板</span>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <div class="page-header">
+      <h1>设备状态看板</h1>
+      <p>当前所有设备运行状态</p>
+    </div>
+
+    <div id="equipment-list">
+      <div class="card">
+        <div class="card-title">服务器 A</div>
+        <div class="card-row">
+          <span class="card-tag card-tag-info">服务器</span>
+          <span>B区</span>
+          <span class="card-tag card-tag-success">空闲</span>
+        </div>
+        <div class="card-actions">
+          <a href="equipment-use.html" class="btn btn-primary btn-small">开始使用登记</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">服务器 B</div>
+        <div class="card-row">
+          <span class="card-tag card-tag-info">服务器</span>
+          <span>B区</span>
+          <span class="card-tag card-tag-warning">使用中</span>
+        </div>
+        <div class="card-row">
+          <span>使用人：张三</span>
+          <span>开始：10:00</span>
+          <span>预计结束：14:00</span>
+        </div>
+        <div class="card-actions">
+          <a href="equipment-use.html" class="btn btn-primary btn-small">开始使用登记</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3D 打印机</div>
+        <div class="card-row">
+          <span class="card-tag card-tag-info">3D打印机</span>
+          <span>A区</span>
+          <span class="card-tag card-tag-success">空闲</span>
+        </div>
+        <div class="card-actions">
+          <a href="equipment-use.html" class="btn btn-primary btn-small">开始使用登记</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="no-equipment" class="empty-state" style="display:none;">
+      <p>暂无设备</p>
+    </div>
+
+  </div>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/equipment.js"></script>
+</body>
+</html>
