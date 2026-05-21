@@ -1,0 +1,15 @@
+[Unit]
+Description=Lab Management PocketBase Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lab-management
+ExecStart=/opt/lab-management/pocketbase serve --http=0.0.0.0:8090
+Restart=always
+RestartSec=5
+User=labmanage
+Group=labmanage
+
+[Install]
+WantedBy=multi-user.target

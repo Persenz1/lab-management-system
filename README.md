@@ -68,3 +68,26 @@ lab-management-system/
 
 - **普通成员**：免登录，查看物资/设备、登记设备使用、上报物资状态
 - **管理员**：通过 PocketBase Admin 和 admin-lite 维护数据、审核上报、导出 CSV
+
+## 部署
+
+生产环境部署在 `/opt/lab-management`，使用 systemd 管理服务。
+
+```bash
+# 一键安装（需要 root）
+sudo bash scripts/install-systemd.sh
+
+# 首次启动
+sudo systemctl start lab-management
+
+# 设置每日备份 (每天凌晨 3 点)
+sudo crontab -e
+# 添加: 0 3 * * * /opt/lab-management/scripts/backup.sh
+```
+
+详见 [部署指南](docs/04_DEPLOYMENT_GUIDE.md) 和 [维护指南](docs/05_MAINTENANCE_GUIDE.md)。
+
+## 关键警告
+
+> **永远不要删除 `/opt/lab-management/pb_data`！**  
+> 这是系统真实数据目录。删除后数据无法恢复。

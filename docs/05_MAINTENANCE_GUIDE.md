@@ -369,3 +369,33 @@ http://服务器IP:8090/equipment-use.html?equipment_id=设备ID
 8. 网盘备份路径；
 9. 二维码贴在哪里；
 10. 项目文档在哪里。
+
+---
+
+## 13. 迁移到新机器
+
+参见 [04_DEPLOYMENT_GUIDE.md - 第 15 节](./04_DEPLOYMENT_GUIDE.md) 获取完整迁移步骤。
+
+简要流程：
+
+1. 在新机器创建 `labmanage` 用户和 `/opt/lab-management` 目录
+2. 从旧机器复制 `pocketbase` 可执行文件和 `pb_data/` 目录
+3. 复制 `pb_hooks/`、`pb_public/`、`scripts/` 目录
+4. 运行 `sudo bash scripts/install-systemd.sh`
+5. 启动服务，检查数据完整性
+
+---
+
+## 14. 二维码维护
+
+二维码生成方式参见 [scripts/generate-qr.md](../scripts/generate-qr.md)。
+
+关键提醒：
+
+- 二维码必须使用**固定 IP**。IP 变化后所有二维码失效，需重新生成。
+- 新增设备后，在 PocketBase Admin 查询设备 ID，生成对应二维码。
+- 建议在网盘中保留二维码图片备份，方便重新打印。
+- 二维码贴放位置：
+  - 总入口：实验室门口、公告栏
+  - 设备登记：每个设备旁
+  - 物资上报：材料柜旁

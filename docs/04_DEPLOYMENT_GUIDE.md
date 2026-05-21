@@ -346,3 +346,76 @@ v0.2 不建议加入：
 7. 多机部署。
 
 这些都会提高后期维护难度。
+
+---
+
+## 15. 迁移到新机器
+
+当需要将系统迁移到另一台服务器时：
+
+### 15.1 准备工作
+
+在新机器上完成基础部署：
+
+```bash
+# 创建目录和用户
+sudo mkdir -p /opt/lab-management
+sudo useradd --system --home /opt/lab-management --shell /usr/sbin/nologin labmanage
+sudo chown -R labmanage:labmanage /opt/lab-management
+```
+
+### 15.2 复制数据
+
+在旧机器上备份：
+
+```bash
+sudo systemctl stop lab-management
+cd /opt/lab-management
+sudo -u labmanage ./scripts/backup.sh
+```
+
+将以下内容复制到新机器：
+
+```text
+1. pocketbase 可执行文件（下载相同版本）
+2. pb_data/ 目录（数据）
+3. pb_hooks/ 目录（业务逻辑）
+4. pb_public/ 目录（网页）
+5. pb_migrations/ 目录（迁移文件）
+6. scripts/ 目录（脚本）
+```
+
+或直接用备份包迁移：
+
+```bash
+# 旧机器：生成完整备份
+cd /opt/lab-management
+tar -czf /tmp/lab-full-migration.tar.gz pocketbase pb_data pb_hooks pb_public pb_migrations scripts
+
+# 复制到新机器
+scp /tmp/lab-full-migration.tar.gz user@新机器IP:/tmp/
+
+# 新机器：解压
+cd /opt/lab-management
+sudo tar -xzf /tmp/lab-full-migration.tar.gz
+sudo chown -R labmanage:labmanage /opt/lab-management
+sudo chmod +x /opt/lab-management/pocketbase
+sudo chmod +x /opt/lab-management/scripts/backup.sh
+```
+
+### 15.3 安装服务并启动
+
+```bash
+cd /opt/lab-management
+sudo bash scripts/install-systemd.sh
+sudo systemctl start lab-management
+sudo systemctl status lab-management
+```
+
+### 15.4 验证
+
+1. 首页可访问
+2. PocketBase Admin 可登录
+3. 数据完整
+4. 设备登记 custom route 可用
+5. backup.sh 可执行
