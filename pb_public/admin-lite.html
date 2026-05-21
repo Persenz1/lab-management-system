@@ -24,99 +24,80 @@
 
     <div id="admin-message"></div>
 
-    <!-- 标签切换 -->
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="pending-item-reports">待审核物资上报</button>
-      <button class="tab-btn" data-tab="pending-new-items">待审核新物资</button>
-      <button class="tab-btn" data-tab="active-equipment">当前使用设备</button>
-      <button class="tab-btn" data-tab="export">CSV 导出</button>
+    <!-- 登录区 -->
+    <div id="login-section">
+      <div class="card">
+        <div class="card-title">管理员登录</div>
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-email">邮箱</label>
+            <input type="email" id="login-email" class="form-input" placeholder="PocketBase 管理员邮箱" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">密码</label>
+            <input type="password" id="login-password" class="form-input" placeholder="密码" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-large">登录</button>
+        </form>
+      </div>
     </div>
 
-    <!-- 待审核物资状态上报 -->
-    <div id="tab-pending-item-reports" class="tab-panel active">
-      <!-- 手机端：卡片布局 -->
-      <div id="item-reports-list">
-        <div class="card">
-          <div class="card-title">PLA 白色 1.75mm</div>
-          <div class="card-row">
-            <span>上报人：李四</span>
-            <span>上报状态：</span>
-            <span class="card-tag card-tag-warning">余量低</span>
-          </div>
-          <div class="card-row">备注：只剩大概 200g</div>
-          <div class="card-actions">
-            <button class="btn btn-success btn-small btn-approve" data-type="item_report">通过</button>
-            <button class="btn btn-danger btn-small btn-reject" data-type="item_report">拒绝</button>
-          </div>
+    <!-- 管理区（登录后可见） -->
+    <div id="admin-section" style="display:none;">
+      <!-- 管理员信息栏 -->
+      <div id="admin-bar" class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <span style="font-size:0.9rem;color:#475569;">管理员：<strong id="admin-name-display"></strong></span>
+        <button id="logout-btn" class="btn btn-small btn-secondary">登出</button>
+      </div>
+
+      <!-- 标签切换 -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="pending-item-reports">待审核物资上报</button>
+        <button class="tab-btn" data-tab="pending-new-items">待审核新物资</button>
+        <button class="tab-btn" data-tab="active-equipment">当前使用设备</button>
+        <button class="tab-btn" data-tab="export">CSV 导出</button>
+      </div>
+
+      <!-- 待审核物资状态上报 -->
+      <div id="tab-pending-item-reports" class="tab-panel active">
+        <div id="item-reports-list"></div>
+        <div id="no-item-reports" class="empty-state" style="display:none;">
+          <p>暂无待审核的物资状态上报</p>
         </div>
       </div>
 
-      <div id="no-item-reports" class="empty-state" style="display:none;">
-        <p>暂无待审核的物资状态上报</p>
-      </div>
-    </div>
-
-    <!-- 待审核新物资 -->
-    <div id="tab-pending-new-items" class="tab-panel">
-      <div id="new-items-list">
-        <div class="card">
-          <div class="card-title">PETG 黑色 1.75mm</div>
-          <div class="card-row">
-            <span class="card-tag">3D打印材料</span>
-            <span>上报人：王五</span>
-          </div>
-          <div class="card-row">规格：1.75mm / 1kg</div>
-          <div class="card-row">位置：A区</div>
-          <div class="card-actions">
-            <button class="btn btn-success btn-small btn-approve" data-type="new_item">通过</button>
-            <button class="btn btn-danger btn-small btn-reject" data-type="new_item">拒绝</button>
-          </div>
+      <!-- 待审核新物资 -->
+      <div id="tab-pending-new-items" class="tab-panel">
+        <div id="new-items-list"></div>
+        <div id="no-new-items" class="empty-state" style="display:none;">
+          <p>暂无待审核的新物资上报</p>
         </div>
       </div>
 
-      <div id="no-new-items" class="empty-state" style="display:none;">
-        <p>暂无待审核的新物资上报</p>
-      </div>
-    </div>
-
-    <!-- 当前 active 设备记录 -->
-    <div id="tab-active-equipment" class="tab-panel">
-      <div id="active-usage-list">
-        <div class="card">
-          <div class="card-title">服务器 B</div>
-          <div class="card-row">
-            <span class="card-tag card-tag-warning">使用中</span>
-            <span>使用人：张三</span>
-          </div>
-          <div class="card-row">
-            <span>开始：10:00</span>
-            <span>预计：4 小时</span>
-          </div>
-          <div class="card-actions">
-            <button class="btn btn-danger btn-small btn-close-usage">手动关闭</button>
-          </div>
+      <!-- 当前 active 设备记录 -->
+      <div id="tab-active-equipment" class="tab-panel">
+        <div id="active-usage-list"></div>
+        <div id="no-active-usage" class="empty-state" style="display:none;">
+          <p>当前没有正在使用的设备</p>
         </div>
       </div>
 
-      <div id="no-active-usage" class="empty-state" style="display:none;">
-        <p>当前没有正在使用的设备</p>
+      <!-- CSV 导出 -->
+      <div id="tab-export" class="tab-panel">
+        <div class="export-section">
+          <p style="margin-bottom:1rem;color:#64748b;">选择需要导出的数据（含中文表头，Excel 可直接打开）</p>
+          <button id="export-items-btn" class="btn btn-primary">导出物资台账 CSV</button>
+          <button id="export-item-reports-btn" class="btn btn-primary">导出物资状态上报 CSV</button>
+          <button id="export-new-items-btn" class="btn btn-primary">导出新物资上报 CSV</button>
+          <button id="export-usage-btn" class="btn btn-primary">导出设备使用记录 CSV</button>
+        </div>
+        <div id="export-msg"></div>
       </div>
-    </div>
 
-    <!-- CSV 导出 -->
-    <div id="tab-export" class="tab-panel">
-      <div class="export-section">
-        <p style="margin-bottom:1rem;color:#64748b;">选择需要导出的数据</p>
-        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出物资台账 CSV</button>
-        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出物资状态上报 CSV</button>
-        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出新物资上报 CSV</button>
-        <button class="btn btn-primary" onclick="alert('导出功能将在后续阶段实现')">导出设备使用记录 CSV</button>
+      <!-- 跳转 PocketBase Admin -->
+      <div class="home-sub">
+        <a href="/_/" target="_blank">打开 PocketBase Admin &#8594;</a>
       </div>
-    </div>
-
-    <!-- 跳转 PocketBase Admin -->
-    <div class="home-sub">
-      <a href="/_/" target="_blank">打开 PocketBase Admin →</a>
     </div>
 
   </div>

@@ -469,6 +469,21 @@ body {
   margin: 0.25rem;
 }
 
+/* ---- 管理后台 ---- */
+.admin-bar-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.export-msg {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
 /* ============================================================
    桌面端适配（>= 768px）
    ============================================================ */
