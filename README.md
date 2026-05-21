@@ -6,10 +6,10 @@
 
 | 组件 | 选型 |
 |---|---|
-| 后端 | PocketBase（单文件） |
+| 后端 | PocketBase（单文件，要求 v0.23+） |
 | 数据库 | PocketBase 内置 SQLite |
 | 前端 | 静态 HTML / CSS / 原生 JavaScript |
-| SDK | PocketBase JS SDK |
+| SDK | PocketBase JS SDK（本地 `pb_public/assets/vendor/pocketbase.umd.js`） |
 | 业务逻辑 | pb_hooks / custom routes |
 | 部署 | systemd 开机自启 |
 | 备份 | 本机 tar.gz + 手动网盘 |
@@ -22,6 +22,8 @@
 cd /opt/lab-management
 ./pocketbase serve --http=0.0.0.0:8090
 ```
+
+当前 `pb_hooks/main.pb.js` 使用 `$app.runInTransaction()` 和新版 request hooks，部署时请使用 PocketBase v0.23 或更高版本。
 
 首次启动后访问 `http://服务器IP:8090/_/` 创建管理员账号。
 
@@ -50,6 +52,8 @@ lab-management-system/
 │   ├── new-item-report.html
 │   ├── admin-lite.html
 │   └── assets/
+│       └── vendor/
+│           └── pocketbase.umd.js
 ├── scripts/
 │   ├── backup.sh
 │   └── install-systemd.sh

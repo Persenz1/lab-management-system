@@ -1,4 +1,8 @@
-将 PocketBase JS SDK 文件放入此目录，命名为 pocketbase.umd.js。
+此目录保存本地 PocketBase JS SDK，HTML 页面会引用：
+
+  assets/vendor/pocketbase.umd.js
+
+部署时必须保留该文件，避免局域网/离线环境依赖公网 CDN。
 
 下载地址（选任一）：
   jsDelivr: https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js

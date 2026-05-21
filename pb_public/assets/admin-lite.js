@@ -162,18 +162,7 @@
 
     setButtonLoadingById(reportId, 'approve-item-btn', true);
 
-    var now = new Date().toISOString();
-
-    // Step 1: 先更新 items.status（若失败，report 保持 "待审核"）
-    // Step 2: 再更新 item_reports 审核状态
-    pbApi.getPb().collection('items').update(itemId, { status: reportedStatus })
-      .then(function () {
-        return pbApi.updateItemReport(reportId, {
-          review_status: '已通过',
-          reviewed_by: adminDisplayName,
-          reviewed_at: now,
-        });
-      })
+    pbApi.approveItemReport(reportId, adminDisplayName)
       .then(function () {
         common.showMessage('admin-message', '已通过物资状态上报，正式物资状态已更新', 'success');
         setTimeout(function () { common.clearMessage('admin-message'); }, 3000);
@@ -190,11 +179,7 @@
 
     setButtonLoadingById(reportId, 'reject-item-btn', true);
 
-    pbApi.updateItemReport(reportId, {
-      review_status: '已拒绝',
-      reviewed_by: adminDisplayName,
-      reviewed_at: new Date().toISOString(),
-    })
+    pbApi.rejectItemReport(reportId, adminDisplayName)
       .then(function () {
         common.showMessage('admin-message', '已拒绝物资状态上报', 'success');
         setTimeout(function () { common.clearMessage('admin-message'); }, 3000);
@@ -270,49 +255,14 @@
 
     setButtonLoadingById(reportId, 'approve-new-btn', true);
 
-    var createdItemId = null;
-
-    // Step 1: 创建正式 items 记录
-    // Step 2: 更新上报记录并回填 created_item
-    // 若 Step 2 失败，尝试回滚 Step 1 的 items 记录
-    pbApi.getPb().collection('new_item_reports').getOne(reportId)
-      .then(function (report) {
-        var itemData = {
-          name: report.name,
-          item_type: report.item_type,
-          specification: report.specification || '',
-          status: report.initial_status || '正常',
-          location_note: report.location_note || '',
-          note: report.note || '',
-          is_active: true,
-        };
-        if (report.location) {
-          itemData.location = report.location;
-        }
-        return pbApi.createItem(itemData);
-      })
-      .then(function (created) {
-        createdItemId = created.id;
-        return pbApi.updateNewItemReport(reportId, {
-          review_status: '已通过',
-          reviewed_by: adminDisplayName,
-          reviewed_at: new Date().toISOString(),
-          created_item: createdItemId,
-        });
-      })
+    pbApi.approveNewItem(reportId, adminDisplayName)
       .then(function () {
         common.showMessage('admin-message', '已通过新物资上报，正式台账已创建', 'success');
         setTimeout(function () { common.clearMessage('admin-message'); }, 3000);
         loadPendingNewItems();
       })
       .catch(function (err) {
-        // 如果 items 已创建但 report 更新失败，尝试删除孤儿的 items 记录
-        if (createdItemId) {
-          pbApi.getPb().collection('items').delete(createdItemId).catch(function () {});
-          common.showMessage('admin-message', '操作失败：上报审核出错，已回滚正式物资记录', 'error');
-        } else {
-          common.showMessage('admin-message', '操作失败：' + pbApi.getError(err), 'error');
-        }
+        common.showMessage('admin-message', '操作失败：' + pbApi.getError(err), 'error');
         loadPendingNewItems();
       });
   }
@@ -322,11 +272,7 @@
 
     setButtonLoadingById(reportId, 'reject-new-btn', true);
 
-    pbApi.updateNewItemReport(reportId, {
-      review_status: '已拒绝',
-      reviewed_by: adminDisplayName,
-      reviewed_at: new Date().toISOString(),
-    })
+    pbApi.rejectNewItem(reportId, adminDisplayName)
       .then(function () {
         common.showMessage('admin-message', '已拒绝新物资上报', 'success');
         setTimeout(function () { common.clearMessage('admin-message'); }, 3000);
@@ -402,11 +348,7 @@
 
     setButtonLoadingById(usageId, 'close-usage-btn', true);
 
-    pbApi.updateEquipmentUsage(usageId, {
-      status: 'closed',
-      end_time: new Date().toISOString(),
-      end_reason: 'admin_closed',
-    })
+    pbApi.closeEquipmentUsage(usageId)
       .then(function () {
         common.showMessage('admin-message', '设备使用记录已关闭', 'success');
         setTimeout(function () { common.clearMessage('admin-message'); }, 3000);

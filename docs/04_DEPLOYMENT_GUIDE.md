@@ -96,6 +96,8 @@ sudo chown -R labmanage:labmanage /opt/lab-management
 
 ## 5. 放置 PocketBase
 
+本项目要求 PocketBase v0.23 或更高版本。`pb_hooks/main.pb.js` 使用新版 request hooks 和 `$app.runInTransaction()`，低于 v0.23 的可执行文件不要用于部署。
+
 将 PocketBase 可执行文件放入：
 
 ```text
@@ -121,6 +123,14 @@ cd /opt/lab-management
 http://服务器IP:8090
 http://服务器IP:8090/_/
 ```
+
+确认前端 SDK 文件存在：
+
+```bash
+test -f /opt/lab-management/pb_public/assets/vendor/pocketbase.umd.js
+```
+
+如果该文件不存在，普通页面和 admin-lite 都会因缺少 PocketBase JS SDK 而初始化失败。
 
 ---
 

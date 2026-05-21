@@ -54,16 +54,16 @@ var pbApi = (function () {
     var filters = ['is_active=true'];
     if (filterText && filterText.trim()) {
       var txt = filterText.trim();
-      filters.push("(name~'" + txt + "' || specification~'" + txt + "')");
+      filters.push(pb.filter('(name~{:txt} || specification~{:txt})', { txt: txt }));
     }
     if (typeFilter) {
-      filters.push("item_type='" + typeFilter + "'");
+      filters.push(pb.filter('item_type={:type}', { type: typeFilter }));
     }
     if (statusFilter) {
-      filters.push("status='" + statusFilter + "'");
+      filters.push(pb.filter('status={:status}', { status: statusFilter }));
     }
     if (locationFilter) {
-      filters.push("location.display_name='" + locationFilter + "'");
+      filters.push(pb.filter('location.display_name={:location}', { location: locationFilter }));
     }
 
     return pb.collection('items').getFullList({
@@ -85,7 +85,10 @@ var pbApi = (function () {
   // ---- 获取设备 active 使用记录 ----
   function getActiveUsage(equipmentId) {
     return pb.collection('equipment_usage').getFullList({
-      filter: "equipment='" + equipmentId + "' && status='active'",
+      filter: pb.filter('equipment={:equipmentId} && status={:status}', {
+        equipmentId: equipmentId,
+        status: 'active',
+      }),
       sort: '-start_time',
       expand: 'equipment,materials',
     });
@@ -94,7 +97,10 @@ var pbApi = (function () {
   // ---- 获取物资待审核上报 ----
   function getPendingReports(itemId) {
     return pb.collection('item_reports').getFullList({
-      filter: "item='" + itemId + "' && review_status='待审核'",
+      filter: pb.filter('item={:itemId} && review_status={:status}', {
+        itemId: itemId,
+        status: '待审核',
+      }),
     });
   }
 
@@ -153,20 +159,46 @@ var pbApi = (function () {
     });
   }
 
-  function updateItemReport(id, data) {
-    return pb.collection('item_reports').update(id, data);
+  function sendAdminAction(path, data) {
+    return pb.send('/api/custom/admin/' + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data || {}),
+    });
   }
 
-  function updateNewItemReport(id, data) {
-    return pb.collection('new_item_reports').update(id, data);
+  function approveItemReport(id, reviewedBy) {
+    return sendAdminAction('approve-item-report', {
+      report_id: id,
+      reviewed_by: reviewedBy || '',
+    });
   }
 
-  function updateEquipmentUsage(id, data) {
-    return pb.collection('equipment_usage').update(id, data);
+  function rejectItemReport(id, reviewedBy) {
+    return sendAdminAction('reject-item-report', {
+      report_id: id,
+      reviewed_by: reviewedBy || '',
+    });
   }
 
-  function createItem(data) {
-    return pb.collection('items').create(data);
+  function approveNewItem(id, reviewedBy) {
+    return sendAdminAction('approve-new-item', {
+      report_id: id,
+      reviewed_by: reviewedBy || '',
+    });
+  }
+
+  function rejectNewItem(id, reviewedBy) {
+    return sendAdminAction('reject-new-item', {
+      report_id: id,
+      reviewed_by: reviewedBy || '',
+    });
+  }
+
+  function closeEquipmentUsage(id) {
+    return sendAdminAction('close-equipment-usage', {
+      usage_id: id,
+    });
   }
 
   // ---- 导出 CSV（用 fetch 拼接参数） ----
@@ -196,10 +228,11 @@ var pbApi = (function () {
     adminAuth: adminAuth,
     getPendingItemReports: getPendingItemReports,
     getPendingNewItems: getPendingNewItems,
-    updateItemReport: updateItemReport,
-    updateNewItemReport: updateNewItemReport,
-    updateEquipmentUsage: updateEquipmentUsage,
-    createItem: createItem,
+    approveItemReport: approveItemReport,
+    rejectItemReport: rejectItemReport,
+    approveNewItem: approveNewItem,
+    rejectNewItem: rejectNewItem,
+    closeEquipmentUsage: closeEquipmentUsage,
     exportCsv: exportCsv,
   };
 })();
