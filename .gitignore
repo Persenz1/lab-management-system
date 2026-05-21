@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+dist/
+build/
+.next/
+.nuxt/
+.output/
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# PocketBase runtime data
+pb_data/
+pb_public/
+pb_hooks/__generated__/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
