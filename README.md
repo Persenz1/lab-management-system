@@ -89,7 +89,7 @@ sudo crontab -e
 # 添加: 0 3 * * * /opt/lab-management/scripts/backup.sh
 ```
 
-详见 [部署指南](docs/04_DEPLOYMENT_GUIDE.md) 和 [维护指南](docs/05_MAINTENANCE_GUIDE.md)。
+首次部署建议按 [通用部署教程](docs/07_DEPLOYMENT_QUICKSTART.md) 执行；更多细节见 [部署指南](docs/04_DEPLOYMENT_GUIDE.md) 和 [维护指南](docs/05_MAINTENANCE_GUIDE.md)。
 
 ## 关键警告
 
