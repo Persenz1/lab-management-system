@@ -383,6 +383,12 @@ body {
   border: 1px solid #bfdbfe;
 }
 
+.msg-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
 .msg-loading {
   background: #f1f5f9;
   color: #475569;

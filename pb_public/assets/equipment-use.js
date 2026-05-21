@@ -6,6 +6,8 @@
 (function () {
   'use strict';
 
+  var activeUsageByEquipment = {};
+
   document.addEventListener('DOMContentLoaded', function () {
     if (!pbApi.init()) {
       common.showMessage('form-message', '系统未初始化，请检查 PocketBase SDK 是否已加载', 'error');
@@ -40,8 +42,21 @@
 
   function loadEquipmentList() {
     var selectEl = document.getElementById('equipment-id');
-    pbApi.getEquipment()
-      .then(function (equipment) {
+    selectEl.addEventListener('change', function () {
+      showActiveUsageWarning(this.value, activeUsageByEquipment[this.value]);
+    });
+
+    Promise.all([pbApi.getEquipment(), pbApi.getAllActiveUsage()])
+      .then(function (results) {
+        var equipment = results[0];
+        var activeUsage = results[1];
+        activeUsageByEquipment = {};
+        activeUsage.forEach(function (usage) {
+          if (!activeUsageByEquipment[usage.equipment]) {
+            activeUsageByEquipment[usage.equipment] = usage;
+          }
+        });
+
         equipment.forEach(function (eq) {
           // 只显示启用且可用的设备（排除停用和维护中的）
           if (eq.status !== '可用') return;
@@ -55,6 +70,7 @@
         if (preSelectId) {
           selectEl.value = preSelectId;
         }
+        showActiveUsageWarning(selectEl.value, activeUsageByEquipment[selectEl.value]);
       })
       .catch(function (err) {
         common.showMessage('form-message', '加载设备列表失败：' + pbApi.getError(err), 'error');
@@ -101,6 +117,83 @@
     return ids;
   }
 
+  function buildUsageWarningHtml(usage) {
+    var html = '<div class="msg msg-warning" style="margin-top:0.5rem;margin-bottom:0;text-align:left;">' +
+      '当前设备正在使用中。继续提交会自动关闭上一条使用记录，并标记为 overridden_by_new_usage。' +
+      '<br>当前使用人：' + common.escapeHtml(usage.user_name || '未知');
+
+    if (usage.start_time) {
+      html += '<br>开始时间：' + common.escapeHtml(common.formatTime(usage.start_time));
+    }
+
+    if (usage.estimated_duration) {
+      var startMs = new Date(usage.start_time).getTime();
+      if (!isNaN(startMs)) {
+        var expectedEnd = new Date(startMs + usage.estimated_duration * 60 * 1000);
+        html += '<br>预计结束：' + common.escapeHtml(common.formatTime(expectedEnd.toISOString()));
+      }
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function showActiveUsageWarning(equipmentId, usage) {
+    var warningEl = document.getElementById('equipment-active-warning');
+    if (!warningEl) return;
+    if (!equipmentId || !usage) {
+      warningEl.style.display = 'none';
+      warningEl.innerHTML = '';
+      return;
+    }
+    warningEl.innerHTML = buildUsageWarningHtml(usage);
+    warningEl.style.display = 'block';
+  }
+
+  function buildOverrideConfirmMessage(usage) {
+    var lines = [
+      '这个设备当前正在使用中。',
+      '',
+      '当前使用人：' + (usage.user_name || '未知'),
+    ];
+
+    if (usage.start_time) {
+      lines.push('开始时间：' + common.formatTime(usage.start_time));
+    }
+    if (usage.estimated_duration) {
+      var startMs = new Date(usage.start_time).getTime();
+      if (!isNaN(startMs)) {
+        var expectedEnd = new Date(startMs + usage.estimated_duration * 60 * 1000);
+        lines.push('预计结束：' + common.formatTime(expectedEnd.toISOString()));
+      }
+    }
+
+    lines.push('');
+    lines.push('继续提交会自动关闭上一条使用记录。确认继续？');
+    return lines.join('\n');
+  }
+
+  function submitRegistration(data, hadActiveUsage) {
+    common.showMessage('form-message', '提交中，请稍候...', 'loading');
+
+    pbApi.submitEquipmentUse(data)
+      .then(function () {
+        common.showSuccessPage(
+          'form-message',
+          hadActiveUsage
+            ? '设备使用登记成功！上一条使用记录已自动关闭。'
+            : '设备使用登记成功！',
+          'equipment-use.html',
+          '继续登记'
+        );
+        document.getElementById('equipment-use-form').style.display = 'none';
+      })
+      .catch(function (err) {
+        common.enableSubmit('#equipment-use-form');
+        common.showMessage('form-message', '提交失败：' + pbApi.getError(err), 'error');
+      });
+  }
+
   function handleSubmit() {
     common.clearMessage('form-message');
 
@@ -138,21 +231,29 @@
     }
 
     common.disableSubmit('#equipment-use-form');
-    common.showMessage('form-message', '提交中，请稍候...', 'loading');
+    common.showMessage('form-message', '检查设备当前使用状态...', 'loading');
 
-    pbApi.submitEquipmentUse(data)
-      .then(function () {
-        common.showSuccessPage(
-          'form-message',
-          '设备使用登记成功！新登记会自动关闭该设备的上一条使用记录。',
-          'equipment-use.html',
-          '继续登记'
-        );
-        document.getElementById('equipment-use-form').style.display = 'none';
+    pbApi.getActiveUsage(equipmentId)
+      .then(function (activeUsage) {
+        var currentUsage = activeUsage && activeUsage.length ? activeUsage[0] : null;
+        if (currentUsage) {
+          activeUsageByEquipment[equipmentId] = currentUsage;
+        } else {
+          delete activeUsageByEquipment[equipmentId];
+        }
+        showActiveUsageWarning(equipmentId, currentUsage);
+
+        if (currentUsage && !window.confirm(buildOverrideConfirmMessage(currentUsage))) {
+          common.enableSubmit('#equipment-use-form');
+          common.clearMessage('form-message');
+          return;
+        }
+
+        submitRegistration(data, !!currentUsage);
       })
       .catch(function (err) {
         common.enableSubmit('#equipment-use-form');
-        common.showMessage('form-message', '提交失败：' + pbApi.getError(err), 'error');
+        common.showMessage('form-message', '检查设备状态失败：' + pbApi.getError(err), 'error');
       });
   }
 })();
